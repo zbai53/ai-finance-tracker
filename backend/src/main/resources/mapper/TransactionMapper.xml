@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.financetracker.backend.mapper.TransactionMapper">
+
+    <select id="selectByUserIdAndDateRange" resultType="com.financetracker.backend.entity.Transaction">
+        SELECT *
+        FROM transaction
+        <where>
+            user_id = #{userId}
+            <if test="startDate != null">
+                AND transaction_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND transaction_date &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY transaction_date DESC
+    </select>
+
+</mapper>
