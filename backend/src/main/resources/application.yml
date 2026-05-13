@@ -13,3 +13,8 @@ spring:
 
 server:
   port: 8080
+
+
+jwt:
+  secret: finance-tracker-jwt-secret-key-2026-zhihao
+  expiration: 86400000
