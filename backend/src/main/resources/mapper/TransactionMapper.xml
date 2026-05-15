@@ -19,4 +19,25 @@
         ORDER BY transaction_date DESC
     </select>
 
+    <select id="selectByFilter" resultType="com.financetracker.backend.entity.Transaction">
+        SELECT *
+        FROM transaction
+        <where>
+            user_id = #{userId}
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="startDate != null">
+                AND transaction_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND transaction_date &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY transaction_date DESC
+    </select>
+
 </mapper>
