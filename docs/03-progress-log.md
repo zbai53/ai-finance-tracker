@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-05-15 (Thursday) · Day 5 — Transaction CRUD with dynamic SQL
+
+**Phase:** Week 1 (Spring Boot Backend Foundation)
+**Time spent:** ~3 hrs
+**Day:** 5 of 28
+
+### Done
+- Added PageHelper dependency for pagination
+- Wrote `TransactionService` with create, list (filtered + paginated), update, delete
+- Implemented `getOwnedTransaction()` helper for authorization checks
+- Added `selectByFilter` method to `TransactionMapper` with `@Param` annotations
+- Wrote dynamic SQL in `TransactionMapper.xml` using `<where>` + `<if>` for optional filters
+- Wrote `TransactionController` with `@RequestParam`, `@PathVariable`, `@RequestBody`
+- Tested full CRUD in Postman: create, filter by type, paginate, delete
+- Verified dynamic SQL: `type=income` returns empty list, `type=expense` returns all 3 records
+
+### Blockers / lessons
+- `@PutMapping` not `@PutMapper` — annotation name matters
+- `record` accessor methods drop the `get` prefix
+- PageHelper requires `startPage()` to be called immediately before the query (ThreadLocal-based)
+- JWT verifies identity (authentication), ownership check verifies access (authorization) — both needed
+
+### Next session goal
+- Day 6: Write `CategoryService`, `CategoryController`, and aggregate `StatisticsController` with `GROUP BY` queries
+
 ## 2026-05-14 (Wednesday) · Day 4 — Auth endpoints and global exception handling
 
 **Phase:** Week 1 (Spring Boot Backend Foundation)
