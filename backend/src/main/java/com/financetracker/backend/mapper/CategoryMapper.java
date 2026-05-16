@@ -5,6 +5,6 @@ import com.financetracker.backend.entity.Category;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface CategoryMapper{
+public interface CategoryMapper extends BaseMapper<Category>{
 
 }
