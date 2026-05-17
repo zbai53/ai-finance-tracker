@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-05-16 (Friday) · Day 6 — Category CRUD and statistics aggregation
+
+**Phase:** Week 1 (Spring Boot Backend Foundation)
+**Time spent:** ~3 hrs
+**Day:** 6 of 28
+
+### Done
+- Wrote `CategoryService` (create, list, delete) using `QueryWrapper` for simple queries
+- Wrote `CategoryController` with 3 endpoints — deliberately skipped update and pagination per scope discipline
+- Created two DTOs: `CategoryStatistics` (categoryId, categoryName, total, count) and `MonthlySummary` (totalIncome, totalExpense, net)
+- Added `selectCategoryStatistics` and `selectMonthlySummary` to `TransactionMapper`
+- Wrote aggregate SQL with `LEFT JOIN`, `GROUP BY`, `CASE WHEN`, `COALESCE`, and dynamic filters
+- Used `ResultMap` to explicitly map JOIN aliases like `category_name` to `categoryName`
+- Wrote `StatisticsController` calling Mapper directly (no service layer — pure query, no business logic)
+- Tested in Postman: monthly summary returns correct totals, by-category groups correctly with NULL handling
+
+### Blockers / lessons
+- `BaseMapper` methods (`insert`, `selectById`, etc) only work if the Mapper actually extends `BaseMapper<T>` — missed it on CategoryMapper
+- `ResultMap` is needed when columns come from JOIN aliases or aggregate functions — auto camelCase mapping isn't reliable there
+- Skipping the service layer is a deliberate choice for thin query controllers — would refactor if business logic emerges
+- `COALESCE(..., 0)` handles NULL gracefully when no records match the filter
+
+### Next session goal
+- Day 7: Build Postman collection, run full end-to-end test, fix any bugs found, export collection to `docs/`
+
 ## 2026-05-15 (Thursday) · Day 5 — Transaction CRUD with dynamic SQL
 
 **Phase:** Week 1 (Spring Boot Backend Foundation)
