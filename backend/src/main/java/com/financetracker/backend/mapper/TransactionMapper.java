@@ -1,6 +1,8 @@
 package com.financetracker.backend.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.financetracker.backend.dto.CategoryStatistics;
+import com.financetracker.backend.dto.MonthlySummary;
 import com.financetracker.backend.entity.Transaction;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -23,5 +25,19 @@ public interface TransactionMapper extends BaseMapper<Transaction> {
             @Param("categoryId") Long categoryId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
+    );
+
+
+    List<CategoryStatistics> selectCategoryStatistics(
+            @Param("userId") Long userId,
+            @Param("type") String type,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    MonthlySummary selectMonthlySummary(
+            @Param("userId") Long userId,
+            @Param("year") Integer year,
+            @Param("month") Integer month
     );
 }
