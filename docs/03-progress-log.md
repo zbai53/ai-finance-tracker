@@ -5,6 +5,34 @@
 
 ---
 
+
+
+## 2026-05-17 (Saturday) · Day 7 — Postman collection and Week 1 wrap-up
+
+**Phase:** Week 1 (Spring Boot Backend Foundation) — COMPLETE
+**Time spent:** ~2 hrs
+**Day:** 7 of 28
+
+### Done
+- Created Postman collection `AI Finance Tracker API` with 4 folders (Auth, Transactions, Categories, Statistics) and 11 requests
+- Set up environment variables `baseUrl` and `token` for portable URLs
+- Wrote post-response script on Login to auto-inject token into environment
+- Ran full E2E flow: login → create category → create transaction → list → monthly summary → by-category
+- Code review: verified every write endpoint passes userId to service layer, every service write method checks ownership
+- Understood IDOR vulnerability and why ownership checks matter on every write operation
+- Exported collection to `docs/api.postman_collection.json`
+
+### Blockers / lessons
+- Postman scripts moved from "Tests" tab to "Scripts → Post-response"
+- Authorization (ownership check) is separate from Authentication (JWT) — both are required for safe writes
+- Read operations are lower-risk than write operations — focus security review on create/update/delete first
+
+### Week 1 deliverable
+A complete backend REST API with JWT auth, multi-layer architecture, dynamic SQL filtering, pagination, and aggregate statistics. All 11 endpoints work end-to-end via Postman.
+
+### Next session goal
+- Day 8: Initialize React + Vite + TypeScript frontend project, set up routing and AuthContext
+
 ## 2026-05-16 (Friday) · Day 6 — Category CRUD and statistics aggregation
 
 **Phase:** Week 1 (Spring Boot Backend Foundation)
