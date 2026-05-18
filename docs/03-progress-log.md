@@ -6,6 +6,33 @@
 ---
 
 
+## 2026-05-18 (Sunday) · Day 8 — React project init with routing and auth context
+
+**Phase:** Week 2 (React Frontend)
+**Time spent:** ~3 hrs
+**Day:** 8 of 28
+
+### Done
+- Initialized Vite + React 18 + TypeScript project under `frontend/`
+- Installed dependencies: axios, react-router-dom, recharts, tailwindcss v3
+- Configured Tailwind: `tailwind.config.js` content paths + `@tailwind` directives in `index.css`
+- Created folder structure: `api/`, `components/`, `context/`, `pages/`, `types/`
+- Wrote `http.ts` with Axios instance, request interceptor (auto-inject JWT), response interceptor (401/403 redirect)
+- Defined TypeScript interfaces in `types/index.ts` for Result, User, Transaction, Category, PageResult, statistics DTOs
+- Wrote `AuthContext.tsx` with `login()`, `logout()`, `isAuthenticated` state
+- Wrote `ProtectedRoute` component that redirects to `/login` if unauthenticated
+- Wrote `App.tsx` with routes for `/login`, `/dashboard` (protected), and `/` redirect
+- Tested routing: unauthenticated redirects to login, with token in localStorage shows dashboard
+
+### Blockers / lessons
+- `useState(null)` + `useEffect` for reading localStorage causes a first-render flicker — `ProtectedRoute` sees `token=null` and redirects before useEffect runs. Fix: use lazy initializer `useState(() => localStorage.getItem('token'))` so initial state is correct synchronously
+- TypeScript with new compiler options requires `import type` for type-only imports like `ReactNode`
+- Tailwind v3 vs v4 have different config — installed v3 explicitly to match the roadmap
+- Frontend types are contracts between backend and frontend — they let the compiler catch typos and breaking changes at compile time
+
+### Next session goal
+- Day 9: Build complete Login and Register pages with form validation, API integration, and error handling
+
 
 ## 2026-05-17 (Saturday) · Day 7 — Postman collection and Week 1 wrap-up
 
@@ -32,6 +59,7 @@ A complete backend REST API with JWT auth, multi-layer architecture, dynamic SQL
 
 ### Next session goal
 - Day 8: Initialize React + Vite + TypeScript frontend project, set up routing and AuthContext
+
 
 ## 2026-05-16 (Friday) · Day 6 — Category CRUD and statistics aggregation
 
