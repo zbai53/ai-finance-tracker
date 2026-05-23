@@ -6,6 +6,29 @@
 ---
 
 
+## 2026-05-18 (Sunday) · Day 9 — Login and Register pages with API integration
+
+**Phase:** Week 2 (React Frontend)
+**Time spent:** ~2 hrs
+**Day:** 9 of 28
+
+### Done
+- Wrote `src/api/auth.ts` with `login()` and `register()` functions using typed Axios calls
+- Wrote complete `LoginPage` with controlled inputs, loading state, error display, and JWT save on success
+- Wrote complete `RegisterPage` with client-side password length validation, auto-login after register
+- Added `/register` route to `App.tsx`
+- Fixed CORS: added `CorsConfig.java` to allow `localhost:5173` and `5174`
+- Tested full flow: register new user → auto-login → redirect to Dashboard
+
+### Blockers / lessons
+- CORS blocked the first login attempt — browser blocks cross-origin requests unless the server explicitly allows it via `Access-Control-Allow-Origin` header
+- `.then(r => r.data.data)` — two `.data` because Axios wraps response in its own `.data`, and the backend wraps business data in `Result.data`
+- `e.preventDefault()` is required in form `onSubmit` — without it the browser refreshes the page
+- Register flow calls `register()` then immediately calls `login()` to auto-inject token — one less step for the user
+
+### Next session goal
+- Day 10: Build Transaction list page with data fetching, loading state, filter bar, and pagination
+
 ## 2026-05-18 (Sunday) · Day 8 — React project init with routing and auth context
 
 **Phase:** Week 2 (React Frontend)
