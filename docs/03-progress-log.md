@@ -6,6 +6,29 @@
 ---
 
 
+## 2026-05-24 (Sunday) · Day 13 — App layout with sidebar navigation and polish
+
+**Phase:** Week 2 (React Frontend)
+**Time spent:** ~2 hrs
+**Day:** 13 of 28
+
+### Done
+- Created `AppLayout.tsx` with fixed sidebar (240px), active link detection via `useLocation`, logout button pinned to bottom
+- Mobile responsive: sidebar collapses to hamburger menu on small screens
+- Updated `App.tsx` to wrap all protected routes with `AppLayout`
+- Removed header nav buttons from `DashboardPage` — layout now owns navigation
+- Fixed Net Savings color: red when net < 0, blue when net >= 0
+- Empty state on TransactionsPage now has "Add your first transaction" button that opens modal
+- Both pages visually consistent with shared sidebar and background
+
+### Blockers / lessons
+- frontend-design skill deferred to Day 27 — applying it now would risk breaking working functionality mid-development
+- `useLocation().pathname` is the correct way to detect active route in React Router v6 for styling nav links
+- `NavLink` from react-router-dom also handles active state automatically — worth knowing as an alternative to manual pathname comparison
+
+### Next session goal
+- Day 14: Configure CORS properly for production, set up environment variables, run full E2E test
+
 ## 2026-05-24 (Sunday) · Day 12 — Dashboard with Recharts visualizations
 
 **Phase:** Week 2 (React Frontend)
