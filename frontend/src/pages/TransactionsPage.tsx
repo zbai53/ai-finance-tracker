@@ -117,8 +117,14 @@ export function TransactionsPage() {
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : transactions.length === 0 ? (
-        <div className="flex justify-center items-center h-40 text-gray-400 text-sm">
-          No transactions found.
+        <div className="flex flex-col justify-center items-center h-40 gap-3 text-gray-400 text-sm">
+          <p>No transactions found.</p>
+          <button
+            onClick={() => { setEditingTransaction(undefined); setModalOpen(true); }}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Add your first transaction
+          </button>
         </div>
       ) : (
         <div className="overflow-x-auto">

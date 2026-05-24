@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   PieChart, Pie, Cell,
 } from 'recharts';
-import { useAuth } from '../context/AuthContext';
 import { getMonthlySummary, getCategoryStatistics } from '../api/statistics';
 import type { MonthlySummary, CategoryStatistics } from '../types';
 
@@ -39,31 +37,29 @@ interface LineDataPoint {
 interface SummaryCardProps {
   title: string;
   value: number;
-  color: 'green' | 'red' | 'blue' | 'gray';
+  color: 'green' | 'red' | 'blue';
   loading: boolean;
 }
 
 function SummaryCard({ title, value, color, loading }: SummaryCardProps) {
   const colorMap: Record<SummaryCardProps['color'], string> = {
-    green: 'bg-green-50 border-green-200 text-green-700',
-    red:   'bg-red-50 border-red-200 text-red-700',
-    blue:  'bg-blue-50 border-blue-200 text-blue-700',
-    gray:  'bg-gray-50 border-gray-200 text-gray-600',
+    green: 'bg-green-50 border-green-200',
+    red:   'bg-red-50 border-red-200',
+    blue:  'bg-blue-50 border-blue-200',
   };
-  const amountColor: Record<SummaryCardProps['color'], string> = {
+  const labelColor: Record<SummaryCardProps['color'], string> = {
     green: 'text-green-600',
-    red:   'text-red-600',
+    red:   'text-red-500',
     blue:  'text-blue-600',
-    gray:  'text-gray-600',
   };
 
   return (
     <div className={`rounded-xl border p-5 ${colorMap[color]}`}>
-      <p className="mb-1 text-sm font-medium opacity-70">{title}</p>
+      <p className={`mb-1 text-sm font-medium ${labelColor[color]} opacity-80`}>{title}</p>
       {loading ? (
-        <div className="h-8 w-24 animate-pulse rounded bg-current opacity-20" />
+        <div className="h-8 w-24 animate-pulse rounded bg-gray-200" />
       ) : (
-        <p className={`text-2xl font-bold ${amountColor[color]}`}>
+        <p className={`text-2xl font-bold ${labelColor[color]}`}>
           ${Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: 2 })}
         </p>
       )}
@@ -74,8 +70,6 @@ function SummaryCard({ title, value, color, loading }: SummaryCardProps) {
 // ─── main component ──────────────────────────────────────────────────────────
 
 export function DashboardPage() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
   const now = new Date();
 
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -144,29 +138,12 @@ export function DashboardPage() {
     setSelectedMonth(m);
   }
 
-  const netColor: 'blue' | 'gray' =
-    summary && summary.net >= 0 ? 'blue' : 'gray';
+  const netColor: 'blue' | 'red' =
+    summary !== null && summary.net < 0 ? 'red' : 'blue';
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* ── Header ── */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        <div className="flex gap-3">
-          <button
-            onClick={() => navigate('/transactions')}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Transactions
-          </button>
-          <button
-            onClick={logout}
-            className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
+    <div className="p-6">
+      <h1 className="mb-6 text-2xl font-bold text-gray-800">Dashboard</h1>
 
       {/* ── Month selector ── */}
       <div className="mb-6 flex items-center gap-3">
