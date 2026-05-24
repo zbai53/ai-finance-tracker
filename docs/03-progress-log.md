@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-05-24 (Saturday) · Day 10 — Transaction list page with real data
+
+**Phase:** Week 2 (React Frontend)
+**Time spent:** ~3 hrs
+**Day:** 10 of 28
+
+### Done
+- Wrote `src/api/transactions.ts` and `src/api/categories.ts` with typed Axios functions
+- Added `TransactionsPage` with table, filter bar (type + date range), pagination, loading state, empty state
+- Connected frontend to backend — transaction list displays real data from MySQL
+- Fixed Spring Security circular dependency: replaced `@RequiredArgsConstructor` with manual constructor using `ApplicationContext` injection
+- Fixed CORS preflight: added `OPTIONS /**` permitAll to SecurityConfig so browser preflight requests pass through to CorsFilter
+- Seeded test data via Postman — categories and transactions visible in UI
+
+### Blockers / lessons
+- `Using generated security password` warning means SecurityConfig isn't loading — took multiple attempts to diagnose as circular dependency
+- CORS error on GET/POST but not on login = Spring Security blocking OPTIONS preflight, not a real CORS config issue
+- Preflight (OPTIONS) requests carry no auth token — they must be permitted unconditionally, before authentication checks
+- `Provisional headers are shown` in DevTools = request was blocked before it left the browser, not a server-side issue
+
+### Next session goal
+- Day 11: Build transaction create/edit modal with form, API integration, and list refresh on success
+
 
 ## 2026-05-18 (Sunday) · Day 9 — Login and Register pages with API integration
 
