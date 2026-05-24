@@ -5,6 +5,32 @@
 
 ---
 
+
+## 2026-05-24 (Sunday) · Day 12 — Dashboard with Recharts visualizations
+
+**Phase:** Week 2 (React Frontend)
+**Time spent:** ~2 hrs
+**Day:** 12 of 28
+
+### Done
+- Created `src/api/statistics.ts` with `getMonthlySummary` and `getCategoryStatistics`
+- Built complete `DashboardPage` with:
+  - Month selector (left/right arrows, year rollover handled)
+  - Three summary cards: Total Income, Total Expense, Net Savings with color coding
+  - LineChart (Recharts): last 6 months income vs expense using Promise.all for parallel fetches
+  - PieChart (Recharts): expense breakdown by category with custom legend
+  - Loading states for all three data sources independently
+- Dashboard displays real data from backend — charts update when month changes
+
+### Blockers / lessons
+- `Promise.all` is the right pattern for fetching 6 months of data in parallel — sequential would be 6× slower
+- `ResponsiveContainer` is required for Recharts to fill its parent div — without it the chart has a fixed pixel width
+- Pie chart showing two "Food" categories = duplicate test data in DB, not a code bug
+- Net Savings color bug (should be gray when negative) — minor UI issue to fix in Day 13 polish
+
+### Next session goal
+- Day 13: Add app layout with sidebar navigation, polish all pages for visual consistency
+
 ## 2026-05-24 (Saturday) · Day 10 — Transaction list page with real data
 
 **Phase:** Week 2 (React Frontend)
