@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Transaction, Category } from '../types';
 import { getTransactions } from '../api/transactions';
 import { getCategories } from '../api/categories';
+import { TransactionModal } from '../components/TransactionModal';
 
 type TypeFilter = '' | 'income' | 'expense';
 
@@ -15,8 +16,14 @@ export function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
 
   const totalPages = Math.ceil(total / size);
+  const refresh = () => setRefreshKey(k => k + 1);
 
   useEffect(() => {
     getCategories()
@@ -43,7 +50,7 @@ export function TransactionsPage() {
         setTotal(0);
       })
       .finally(() => setLoading(false));
-  }, [page, typeFilter, startDate, endDate]);
+  }, [page, typeFilter, startDate, endDate, refreshKey]);
 
   function handleTypeChange(value: TypeFilter) {
     setTypeFilter(value);
@@ -68,7 +75,15 @@ export function TransactionsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Transactions</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Transactions</h1>
+        <button
+          onClick={() => { setEditingTransaction(undefined); setModalOpen(true); }}
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+        >
+          + New Transaction
+        </button>
+      </div>
 
       {/* Filter bar */}
       <div className="flex flex-wrap gap-3 mb-4">
@@ -115,6 +130,7 @@ export function TransactionsPage() {
                 <th className="px-4 py-2 border-b">Description</th>
                 <th className="px-4 py-2 border-b">Category</th>
                 <th className="px-4 py-2 border-b text-right">Amount</th>
+                <th className="px-4 py-2 border-b"></th>
               </tr>
             </thead>
             <tbody>
@@ -127,6 +143,14 @@ export function TransactionsPage() {
                   <td className={`px-4 py-2 text-right font-medium ${tx.type === 'income' ? 'text-green-600' : 'text-red-500'}`}>
                     {tx.type === 'income' ? '+' : '-'}
                     {tx.amount.toFixed(2)}
+                  </td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => { setEditingTransaction(tx); setModalOpen(true); }}
+                      className="text-blue-600 hover:underline text-sm"
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -158,6 +182,14 @@ export function TransactionsPage() {
           <span className="text-gray-400 ml-2">{total} total</span>
         </div>
       )}
+
+      {/* Modal */}
+      <TransactionModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSuccess={() => { setModalOpen(false); refresh(); }}
+        transaction={editingTransaction}
+      />
     </div>
   );
 }
