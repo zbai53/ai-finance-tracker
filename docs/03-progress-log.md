@@ -6,6 +6,32 @@
 ---
 
 
+## 2026-05-24 (Sunday) · Day 14 — Environment variables and production CORS config
+
+**Phase:** Week 2 (React Frontend) — COMPLETE
+**Time spent:** ~1.5 hrs
+**Day:** 14 of 28
+
+### Done
+- Created `frontend/.env.development` and `frontend/.env.production` with `VITE_API_BASE_URL`
+- Updated `frontend/src/api/http.ts` to use `import.meta.env.VITE_API_BASE_URL` instead of hardcoded URL
+- Updated `CorsConfig.java` to read allowed origin from `@Value("${frontend.url:http://localhost:5173}")`
+- Added `frontend.url` to `application.yml` for local dev
+- Added `.env.production` to `frontend/.gitignore` — production URLs shouldn't be in source control
+- Ran full E2E test: login → create transaction → dashboard stats → edit → delete — all pass
+
+### Blockers / lessons
+- Environment variables in Vite use `import.meta.env.VITE_*` prefix — `process.env` doesn't work in Vite
+- Spring Boot maps `FRONTEND_URL` env var → `frontend.url` property automatically via relaxed binding
+- `.env.development` is safe to commit (localhost only), `.env.production` should not be committed
+- Same codebase runs in dev and prod by injecting different env vars — no code changes needed to deploy
+
+### Week 2 deliverable
+A complete full-stack app: React frontend with sidebar navigation, transaction CRUD, dashboard charts, JWT auth, and production-ready CORS + environment config. A real user can register, log in, manage transactions, and see a dashboard.
+
+### Next session goal
+- Day 15: Integrate Claude API for automatic transaction categorization
+
 ## 2026-05-24 (Sunday) · Day 13 — App layout with sidebar navigation and polish
 
 **Phase:** Week 2 (React Frontend)

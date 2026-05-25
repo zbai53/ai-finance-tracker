@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.financetracker.backend.ai.AiService;
+import com.financetracker.backend.mapper.CategoryMapper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,11 +20,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionService{
     private final TransactionMapper transactionMapper;
+    private final AiService aiService;
+    private final CategoryMapper categoryMapper;
 
     @Transactional
-    public Transaction create(Long userId, Transaction transaction){
+    public Transaction create(Long userId, Transaction transaction) {
         transaction.setUserId(userId);
         transactionMapper.insert(transaction);
+
+
+        try {
+            List<com.financetracker.backend.entity.Category> categories =
+                categoryMapper.selectList(
+                    new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
+                        <com.financetracker.backend.entity.Category>()
+                        .eq("user_id", userId)
+                );
+            String aiCategory = aiService.categorizeTransaction(
+                transaction.getDescription(),
+                transaction.getAmount(),
+                transaction.getType(),
+                categories
+            );
+            transaction.setAiCategory(aiCategory);
+            transactionMapper.updateById(transaction);
+        } catch (Exception e) {
+            log.warn("AI categorization failed, continuing without it: {}", e.getMessage());
+        }
+
         log.info("Transaction created for user {}: {}", userId, transaction.getId());
         return transaction;
     }
