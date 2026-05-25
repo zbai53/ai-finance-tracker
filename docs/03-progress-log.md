@@ -5,6 +5,30 @@
 
 ---
 
+## 2026-05-25 (Sunday) · Day 15 — Claude API integration for transaction categorization
+
+**Phase:** Week 3 (LLM Features)
+**Time spent:** ~2 hrs
+**Day:** 15 of 28
+
+### Done
+- Added `com.anthropic:anthropic-java:2.11.0` dependency to `pom.xml`
+- Added `anthropic.api-key` config to `application.yml`
+- Created `src/main/java/com/financetracker/backend/ai/AiService.java` with `categorizeTransaction()` method
+- Prompt filters categories by same type (expense→expense only) to reduce noise
+- Integrated AI categorization into `TransactionService.create()` — runs after insert, updates `aiCategory` field
+- AI failure is caught and logged — core transaction creation never blocked
+- Tested: "Grocery shopping at Walmart" → auto-categorized as "Food" ✅
+
+### Blockers / lessons
+- Wrong artifact ID: `com.anthropic:sdk` doesn't exist — correct is `com.anthropic:anthropic-java`
+- `export ANTHROPIC_API_KEY` only applies to the current terminal session — must export in the same terminal that runs `mvn spring-boot:run`
+- New Anthropic API keys need account credit to work — authentication_error 401 = invalid or inactive key
+- `@Value` fields can't be `final` with `@RequiredArgsConstructor` — Lombok only injects `final` fields via constructor, `@Value` uses field injection after construction
+
+### Next session goal
+- Day 16: Implement SSE streaming setup — bridge Claude streaming response to frontend via Spring SseEmitter
+
 
 ## 2026-05-24 (Sunday) · Day 14 — Environment variables and production CORS config
 
