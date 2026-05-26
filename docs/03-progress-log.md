@@ -5,6 +5,30 @@
 
 ---
 
+## 2026-05-26 (Monday) · Day 16 — SSE streaming setup
+
+**Phase:** Week 3 (LLM Features)
+**Time spent:** ~2 hrs
+**Day:** 16 of 28
+
+### Done
+- Added `streamResponse()` method to `AiService` using `client.messages().createStreaming()` with `StreamResponse<RawMessageStreamEvent>`
+- Created `AiController` with `GET /api/ai/stream` endpoint producing `TEXT_EVENT_STREAM_VALUE`
+- Used `CompletableFuture.runAsync` to run blocking stream off the servlet thread — returns `SseEmitter` immediately
+- Updated `JwtAuthenticationFilter` to accept token as query param fallback (needed for `EventSource` which can't set custom headers)
+- Created `frontend/src/hooks/useAiStream.ts` with `start()`, `reset()`, `content`, `isStreaming`, `error` state
+- Tested in browser: `?prompt=Say hello in 3 words&token=...` → real-time streaming chunks visible
+
+### Blockers / lessons
+- Wrong method name: `stream()` doesn't exist on blocking `MessageService` — correct method is `createStreaming()`
+- `StreamResponse<RawMessageStreamEvent>` is `AutoCloseable` — must use try-with-resources
+- Text extraction chain: `.contentBlockDelta().stream()` → `.delta().text().stream()` → `.text()`
+- `EventSource` API in browsers cannot set custom headers — token must be passed as query param for SSE endpoints
+- ANTHROPIC_API_KEY must be exported in the same terminal session as `mvn spring-boot:run`
+
+### Next session goal
+- Day 17: Build monthly financial report feature using SSE streaming — fetch transactions, build prompt with financial context, stream Claude's analysis to frontend
+
 ## 2026-05-25 (Sunday) · Day 15 — Claude API integration for transaction categorization
 
 **Phase:** Week 3 (LLM Features)
