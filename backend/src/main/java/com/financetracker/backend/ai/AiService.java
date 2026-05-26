@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import com.anthropic.core.http.StreamResponse;
+import com.anthropic.models.messages.RawMessageStreamEvent;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -84,6 +87,44 @@ public class AiService {
         } catch (Exception e) {
             log.warn("AI categorization failed for '{}': {}", description, e.getMessage());
             return "Other";
+        }
+    }
+
+    /**
+     * Streams a Claude response chunk-by-chunk into the given SSE emitter.
+     * Each text delta is sent as a plain string event. The emitter is
+     * completed (or completed-with-error) before this method returns.
+     */
+    public void streamResponse(String prompt, SseEmitter emitter) {
+        try {
+            AnthropicClient client = buildClient();
+
+            MessageCreateParams params = MessageCreateParams.builder()
+                    .model("claude-sonnet-4-5")
+                    .maxTokens(1000L)
+                    .addUserMessage(prompt)
+                    .build();
+
+            try (var streamResponse = client.messages().createStreaming(params)) {
+                streamResponse.stream()
+                        .flatMap(event -> event.contentBlockDelta().stream())
+                        .flatMap(deltaEvent -> deltaEvent.delta().text().stream())
+                        .forEach(textDelta -> {
+                            try {
+                                emitter.send(textDelta.text());
+                            } catch (Exception sendEx) {
+                                throw new RuntimeException(sendEx);
+                            }
+                        });
+            }
+
+            emitter.complete();
+            log.info("AI stream completed for prompt: '{}'",
+                    prompt.substring(0, Math.min(prompt.length(), 80)));
+
+        } catch (Exception e) {
+            log.warn("AI stream error: {}", e.getMessage());
+            emitter.completeWithError(e);
         }
     }
 
