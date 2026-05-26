@@ -5,6 +5,32 @@
 
 ---
 
+
+## 2026-05-26 (Monday) · Day 17 — Monthly financial report with streaming output
+
+**Phase:** Week 3 (LLM Features)
+**Time spent:** ~2 hrs
+**Day:** 17 of 28
+
+### Done
+- Created `ReportService.java` — fetches monthly transactions and summary, builds financial context prompt, calls `aiService.streamResponse()`
+- Added `GET /api/ai/report?year=&month=` endpoint to `AiController`
+- Added `buildReportUrl()` helper to `useAiStream.ts`
+- Added "✦ Generate AI Report" button to Dashboard — streams report in real time
+- Report card shows typing cursor while streaming, Clear button to dismiss
+- Fixed Markdown rendering: installed `react-markdown` + `@tailwindcss/typography`, added `prose` class
+- Fixed Markdown heading issue: added "Do NOT use # headings" to prompt
+
+### Blockers / lessons
+- **Never hardcode API keys in application.yml** — GitHub push protection caught it immediately
+- Fix: use `${ANTHROPIC_API_KEY:fallback}` in yml, set real key via environment variable only
+- After a key appears in git history it must be revoked immediately even after rebase
+- `react-markdown` requires dev server restart to pick up new Tailwind plugin (`@tailwindcss/typography`)
+- `onerror` on EventSource fires both on real errors AND normal stream close — treat both as "done"
+
+### Next session goal
+- Day 18: Natural language transaction query — user types "how much did I spend on food last month?" and gets a direct answer
+
 ## 2026-05-26 (Monday) · Day 16 — SSE streaming setup
 
 **Phase:** Week 3 (LLM Features)
