@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAiStream, buildReportUrl } from '../hooks/useAiStream';
 import {
   ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -6,6 +7,7 @@ import {
 } from 'recharts';
 import { getMonthlySummary, getCategoryStatistics } from '../api/statistics';
 import type { MonthlySummary, CategoryStatistics } from '../types';
+import ReactMarkdown from 'react-markdown';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -70,6 +72,7 @@ function SummaryCard({ title, value, color, loading }: SummaryCardProps) {
 // ─── main component ──────────────────────────────────────────────────────────
 
 export function DashboardPage() {
+  const { content: reportContent, isStreaming: reportStreaming, start: startReport, reset: resetReport } = useAiStream();
   const now = new Date();
 
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -145,7 +148,7 @@ export function DashboardPage() {
     <div className="p-6">
       <h1 className="mb-6 text-2xl font-bold text-gray-800">Dashboard</h1>
 
-      {/* ── Month selector ── */}
+      {/* ── Month selector + Report button ── */}
       <div className="mb-6 flex items-center gap-3">
         <button
           onClick={handlePrev}
@@ -167,6 +170,14 @@ export function DashboardPage() {
           <svg className="h-4 w-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
           </svg>
+        </button>
+
+        <button
+          onClick={() => startReport(buildReportUrl(selectedYear, selectedMonth))}
+          disabled={reportStreaming}
+          className="ml-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
+        >
+          {reportStreaming ? 'Generating…' : '✦ Generate AI Report'}
         </button>
       </div>
 
@@ -275,6 +286,43 @@ export function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* ── AI Report card ── */}
+      {(reportStreaming || reportContent) && (
+        <div className="mt-6 rounded-xl border border-violet-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-violet-100 px-5 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-violet-600">✦</span>
+              <h2 className="text-sm font-semibold text-gray-700">
+                AI Financial Report — {LONG_MONTH_NAMES[selectedMonth - 1]} {selectedYear}
+              </h2>
+              {reportStreaming && (
+                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-violet-500" />
+              )}
+            </div>
+            <button
+              onClick={resetReport}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div className="px-5 py-4">
+            {reportStreaming && !reportContent ? (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+                Claude is thinking…
+              </div>
+            ) : (
+              <div className="prose prose-sm max-w-none text-gray-700">
+                <ReactMarkdown>{reportContent}</ReactMarkdown>
+                {reportStreaming && <span className="animate-pulse">▌</span>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

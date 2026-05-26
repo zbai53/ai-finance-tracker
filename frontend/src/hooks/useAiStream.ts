@@ -6,7 +6,8 @@ interface UseAiStreamResult {
   content: string;
   isStreaming: boolean;
   error: string | null;
-  start: (prompt: string) => void;
+  /** Pass the full URL including all query params (token, prompt/year/month, etc.) */
+  start: (url: string) => void;
   reset: () => void;
 }
 
@@ -23,15 +24,11 @@ export function useAiStream(): UseAiStreamResult {
     }
   }
 
-  function start(prompt: string) {
-    // Close any previous connection
+  function start(url: string) {
     closeSource();
     setContent('');
     setError(null);
     setIsStreaming(true);
-
-    const token = localStorage.getItem('token') ?? '';
-    const url = `${BASE_URL}/api/ai/stream?prompt=${encodeURIComponent(prompt)}&token=${encodeURIComponent(token)}`;
 
     const source = new EventSource(url);
     sourceRef.current = source;
@@ -40,15 +37,14 @@ export function useAiStream(): UseAiStreamResult {
       setContent(prev => prev + event.data);
     };
 
+    // onerror fires both on real errors AND when the server closes the stream
+    // normally (browsers can't distinguish). We treat it as "done" generically.
     source.onerror = () => {
-      setError('Stream connection failed or ended unexpectedly.');
       setIsStreaming(false);
       closeSource();
     };
 
-    // Spring's SseEmitter sends a final "complete" event when done;
-    // browsers also fire onerror when the server closes the connection normally,
-    // so onerror doubles as the "done" handler. For an explicit done signal:
+    // Explicit clean-close signal sent by Spring's SseEmitter
     source.addEventListener('complete', () => {
       setIsStreaming(false);
       closeSource();
@@ -63,4 +59,16 @@ export function useAiStream(): UseAiStreamResult {
   }
 
   return { content, isStreaming, error, start, reset };
+}
+
+/** Build the URL for the free-form stream endpoint */
+export function buildStreamUrl(prompt: string): string {
+  const token = localStorage.getItem('token') ?? '';
+  return `${BASE_URL}/api/ai/stream?prompt=${encodeURIComponent(prompt)}&token=${encodeURIComponent(token)}`;
+}
+
+/** Build the URL for the monthly report endpoint */
+export function buildReportUrl(year: number, month: number): string {
+  const token = localStorage.getItem('token') ?? '';
+  return `${BASE_URL}/api/ai/report?year=${year}&month=${month}&token=${encodeURIComponent(token)}`;
 }
