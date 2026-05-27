@@ -4,6 +4,31 @@
 > The newest entry goes at the TOP. Older entries roll down.
 
 ---
+## 2026-05-27 (Tuesday) · Day 18 — Natural language transaction query
+
+**Phase:** Week 3 (LLM Features)
+**Time spent:** ~3 hrs
+**Day:** 18 of 28
+
+### Done
+- Created `NlQueryService.java` with two-call pattern:
+  - Call 1: Claude extracts structured intent JSON from natural language question
+  - Call 2: Claude streams natural language answer using actual transaction data
+- Added `AiService.extractText()` for non-streaming single-call responses
+- Added `GET /api/ai/query?question=` endpoint to `AiController`
+- Added search bar and AI Answer card to DashboardPage
+- Added `buildQueryUrl()` to `useAiStream.ts`
+- Tested: "how much did I spend this month?" → correct streaming answer
+
+### Blockers / lessons
+- API key nightmare: old key cached in `target/classes/application.yml` — `mvn clean` required to clear it
+- Never use environment variables from a different terminal session — key must be in the same session as `mvn spring-boot:run`
+- Anthropic keys may take a few minutes to fully activate after creation
+- **Never commit API keys to git** — GitHub push protection catches it immediately; revoke and regenerate the key even after rebase
+- LLM never writes SQL — it only extracts structured parameters (type, categoryName, startDate, endDate) that map to pre-written MyBatis queries
+
+### Next session goal
+- Day 19: Spending anomaly detection — compare this month's spending to previous months and surface unusual patterns
 
 
 ## 2026-05-26 (Monday) · Day 17 — Monthly financial report with streaming output
