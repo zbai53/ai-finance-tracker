@@ -72,3 +72,9 @@ export function buildReportUrl(year: number, month: number): string {
   const token = localStorage.getItem('token') ?? '';
   return `${BASE_URL}/api/ai/report?year=${year}&month=${month}&token=${encodeURIComponent(token)}`;
 }
+
+/** Build the URL for the natural-language query endpoint */
+export function buildQueryUrl(question: string): string {
+  const token = localStorage.getItem('token') ?? '';
+  return `${BASE_URL}/api/ai/query?question=${encodeURIComponent(question)}&token=${encodeURIComponent(token)}`;
+}

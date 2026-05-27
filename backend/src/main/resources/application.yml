@@ -4,23 +4,17 @@ spring:
     username: root
     password: baizhihao
     driver-class-name: com.mysql.cj.jdbc.Driver
-
   mybatis:
     mapper-locations: classpath:mapper/*.xml
     configuration:
       map-underscore-to-camel-case: true
       log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
 server:
   port: 8080
-
-
 jwt:
   secret: finance-tracker-jwt-secret-key-2026-zhihao
   expiration: 86400000
-
 frontend:
   url: http://localhost:5173
-
 anthropic:
-  api-key: ${ANTHROPIC_API_KEY:your-api-key-here}
+  api-key: ${ANTHROPIC_API_KEY}

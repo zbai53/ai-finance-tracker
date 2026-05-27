@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAiStream, buildReportUrl } from '../hooks/useAiStream';
+import { useAiStream, buildReportUrl, buildQueryUrl } from '../hooks/useAiStream';
 import {
   ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -73,6 +73,8 @@ function SummaryCard({ title, value, color, loading }: SummaryCardProps) {
 
 export function DashboardPage() {
   const { content: reportContent, isStreaming: reportStreaming, start: startReport, reset: resetReport } = useAiStream();
+  const { content: queryContent, isStreaming: queryStreaming, start: startQuery, reset: resetQuery } = useAiStream();
+  const [question, setQuestion] = useState('');
   const now = new Date();
 
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -323,6 +325,69 @@ export function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ── Natural language search ── */}
+      <div className="mt-6">
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            const q = question.trim();
+            if (!q) return;
+            resetQuery();
+            startQuery(buildQueryUrl(q));
+          }}
+          className="flex gap-2"
+        >
+          <input
+            type="text"
+            value={question}
+            onChange={e => setQuestion(e.target.value)}
+            placeholder='Ask anything, e.g. "How much did I spend on food last month?"'
+            className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            disabled={queryStreaming || !question.trim()}
+            className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {queryStreaming ? 'Thinking…' : 'Ask'}
+          </button>
+        </form>
+
+        {(queryStreaming || queryContent) && (
+          <div className="mt-3 rounded-xl border border-blue-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-blue-100 px-5 py-3">
+              <div className="flex items-center gap-2">
+                <span className="text-blue-500">?</span>
+                <h2 className="text-sm font-semibold text-gray-700">AI Answer</h2>
+                {queryStreaming && (
+                  <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-blue-400" />
+                )}
+              </div>
+              <button
+                onClick={() => { resetQuery(); setQuestion(''); }}
+                className="text-xs text-gray-400 hover:text-gray-600"
+              >
+                Clear
+              </button>
+            </div>
+
+            <div className="px-5 py-4">
+              {queryStreaming && !queryContent ? (
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+                  Searching your transactions…
+                </div>
+              ) : (
+                <div className="prose prose-sm max-w-none text-gray-700">
+                  <ReactMarkdown>{queryContent}</ReactMarkdown>
+                  {queryStreaming && <span className="animate-pulse">▌</span>}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

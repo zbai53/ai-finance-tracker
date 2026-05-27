@@ -128,7 +128,28 @@ public class AiService {
         }
     }
 
+    /**
+     * Calls Claude non-streaming and returns the full text response.
+     * Intended for structured extraction tasks (e.g., JSON intent parsing).
+     */
+    public String extractText(String prompt) {
+        AnthropicClient client = buildClient();
+        Message response = client.messages().create(
+                MessageCreateParams.builder()
+                        .model("claude-sonnet-4-5")
+                        .maxTokens(256L)
+                        .addUserMessage(prompt)
+                        .build()
+        );
+        return response.content().stream()
+                .filter(ContentBlock::isText)
+                .findFirst()
+                .map(block -> block.asText().text().strip())
+                .orElseThrow(() -> new IllegalStateException("No text content in Claude response"));
+    }
+
     private AnthropicClient buildClient() {
+        log.info("Using API key starting with: {}", apiKey != null ? apiKey.substring(0, 20) : "NULL");
         return AnthropicOkHttpClient.builder()
                 .apiKey(apiKey)
                 .build();
