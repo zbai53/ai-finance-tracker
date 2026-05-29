@@ -74,9 +74,9 @@ function SummaryCard({ title, value, color, loading }: SummaryCardProps) {
 // ─── main component ──────────────────────────────────────────────────────────
 
 export function DashboardPage() {
-  const { content: reportContent, isStreaming: reportStreaming, start: startReport, reset: resetReport } = useAiStream();
-  const { content: queryContent, isStreaming: queryStreaming, start: startQuery, reset: resetQuery } = useAiStream();
-  const { content: anomalyContent, isStreaming: anomalyStreaming, start: startAnomaly, reset: resetAnomaly } = useAiStream();
+  const { content: reportContent, isStreaming: reportStreaming, error: reportError, start: startReport, reset: resetReport } = useAiStream();
+  const { content: queryContent, isStreaming: queryStreaming, error: queryError, start: startQuery, reset: resetQuery } = useAiStream();
+  const { content: anomalyContent, isStreaming: anomalyStreaming, error: anomalyError, start: startAnomaly, reset: resetAnomaly } = useAiStream();
   const [question, setQuestion] = useState('');
   const [history, setHistory] = useState<AiConversation[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -196,16 +196,26 @@ export function DashboardPage() {
         <button
           onClick={() => startReport(buildReportUrl(selectedYear, selectedMonth))}
           disabled={reportStreaming}
-          className="ml-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
+          className="ml-2 inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
         >
-          {reportStreaming ? 'Generating…' : '✦ Generate AI Report'}
+          {reportStreaming ? (
+            <>
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              {reportContent ? 'Generating…' : 'Starting…'}
+            </>
+          ) : '✦ Generate AI Report'}
         </button>
         <button
           onClick={() => startAnomaly(buildAnomalyUrl(selectedYear, selectedMonth))}
           disabled={anomalyStreaming}
-          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-60"
         >
-          {anomalyStreaming ? 'Checking…' : '⚠ Check Anomalies'}
+          {anomalyStreaming ? (
+            <>
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              {anomalyContent ? 'Analyzing…' : 'Starting…'}
+            </>
+          ) : '⚠ Check Anomalies'}
         </button>
       </div>
 
@@ -316,7 +326,7 @@ export function DashboardPage() {
       </div>
 
       {/* ── AI Report card ── */}
-      {(reportStreaming || reportContent) && (
+      {(reportStreaming || reportContent || reportError) && (
         <div className="mt-6 rounded-xl border border-violet-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-violet-100 px-5 py-3">
             <div className="flex items-center gap-2">
@@ -328,16 +338,23 @@ export function DashboardPage() {
                 <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-violet-500" />
               )}
             </div>
-            <button
-              onClick={resetReport}
-              className="text-xs text-gray-400 hover:text-gray-600"
-            >
+            <button onClick={resetReport} className="text-xs text-gray-400 hover:text-gray-600">
               Clear
             </button>
           </div>
 
           <div className="px-5 py-4">
-            {reportStreaming && !reportContent ? (
+            {reportError ? (
+              <div className="flex items-center justify-between rounded-lg bg-violet-50 px-4 py-3">
+                <p className="text-sm text-violet-700">{reportError}</p>
+                <button
+                  onClick={() => startReport(buildReportUrl(selectedYear, selectedMonth))}
+                  className="ml-4 flex-shrink-0 rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : reportStreaming && !reportContent ? (
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
                 Claude is thinking…
@@ -353,7 +370,7 @@ export function DashboardPage() {
       )}
 
       {/* ── Anomaly card ── */}
-      {(anomalyStreaming || anomalyContent) && (
+      {(anomalyStreaming || anomalyContent || anomalyError) && (
         <div className="mt-6 rounded-xl border border-amber-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-amber-100 px-5 py-3">
             <div className="flex items-center gap-2">
@@ -365,16 +382,23 @@ export function DashboardPage() {
                 <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-400" />
               )}
             </div>
-            <button
-              onClick={resetAnomaly}
-              className="text-xs text-gray-400 hover:text-gray-600"
-            >
+            <button onClick={resetAnomaly} className="text-xs text-gray-400 hover:text-gray-600">
               Clear
             </button>
           </div>
 
           <div className="px-5 py-4">
-            {anomalyStreaming && !anomalyContent ? (
+            {anomalyError ? (
+              <div className="flex items-center justify-between rounded-lg bg-amber-50 px-4 py-3">
+                <p className="text-sm text-amber-700">{anomalyError}</p>
+                <button
+                  onClick={() => startAnomaly(buildAnomalyUrl(selectedYear, selectedMonth))}
+                  className="ml-4 flex-shrink-0 rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : anomalyStreaming && !anomalyContent ? (
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
                 Comparing with previous months…
@@ -411,13 +435,18 @@ export function DashboardPage() {
           <button
             type="submit"
             disabled={queryStreaming || !question.trim()}
-            className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {queryStreaming ? 'Thinking…' : 'Ask'}
+            {queryStreaming ? (
+              <>
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                {queryContent ? 'Thinking…' : 'Starting…'}
+              </>
+            ) : 'Ask'}
           </button>
         </form>
 
-        {(queryStreaming || queryContent) && (
+        {(queryStreaming || queryContent || queryError) && (
           <div className="mt-3 rounded-xl border border-blue-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-blue-100 px-5 py-3">
               <div className="flex items-center gap-2">
@@ -436,7 +465,17 @@ export function DashboardPage() {
             </div>
 
             <div className="px-5 py-4">
-              {queryStreaming && !queryContent ? (
+              {queryError ? (
+                <div className="flex items-center justify-between rounded-lg bg-blue-50 px-4 py-3">
+                  <p className="text-sm text-blue-700">{queryError}</p>
+                  <button
+                    onClick={() => { resetQuery(); startQuery(buildQueryUrl(question)); }}
+                    className="ml-4 flex-shrink-0 rounded-lg border border-blue-300 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : queryStreaming && !queryContent ? (
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
                   Searching your transactions…

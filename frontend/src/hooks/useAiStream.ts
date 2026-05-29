@@ -16,6 +16,8 @@ export function useAiStream(): UseAiStreamResult {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sourceRef = useRef<EventSource | null>(null);
+  // Mirror of `content` in a ref so onerror can read the current value synchronously
+  const contentRef = useRef('');
 
   function closeSource() {
     if (sourceRef.current) {
@@ -26,6 +28,7 @@ export function useAiStream(): UseAiStreamResult {
 
   function start(url: string) {
     closeSource();
+    contentRef.current = '';
     setContent('');
     setError(null);
     setIsStreaming(true);
@@ -34,17 +37,21 @@ export function useAiStream(): UseAiStreamResult {
     sourceRef.current = source;
 
     source.onmessage = (event: MessageEvent<string>) => {
+      contentRef.current += event.data;
       setContent(prev => prev + event.data);
     };
 
-    // onerror fires both on real errors AND when the server closes the stream
-    // normally (browsers can't distinguish). We treat it as "done" generically.
+    // onerror fires both on real errors AND when the server closes the stream normally.
+    // If no content arrived yet, it's a genuine error (network, auth, timeout, etc.).
     source.onerror = () => {
+      if (!contentRef.current) {
+        setError('AI analysis is temporarily unavailable. Please try again later.');
+      }
       setIsStreaming(false);
       closeSource();
     };
 
-    // Explicit clean-close signal sent by Spring's SseEmitter
+    // Explicit clean-close sent by Spring's SseEmitter — no error in this case
     source.addEventListener('complete', () => {
       setIsStreaming(false);
       closeSource();
@@ -53,6 +60,7 @@ export function useAiStream(): UseAiStreamResult {
 
   function reset() {
     closeSource();
+    contentRef.current = '';
     setContent('');
     setError(null);
     setIsStreaming(false);
