@@ -5,6 +5,33 @@
 
 ---
 
+## 2026-05-29 (Thursday) · Day 21 — AI error handling and production polish
+
+**Phase:** Week 3 (LLM Features) — COMPLETE
+**Time spent:** ~1.5 hrs
+**Day:** 21 of 28
+
+### Done
+- Added 30-second timeout to AnthropicClient via `.timeout(Duration.ofSeconds(30))`
+- Created `withRetry()` helper — catches rate limit (429), waits 2 seconds, retries once
+- Error classification: rate limit, auth error, timeout — each with different log level and message
+- Added token usage logging after each successful API call
+- Frontend: error state shows friendly message + "Try Again" button in each AI card
+- Frontend: button states show "Starting…" → "Generating…/Thinking…/Analyzing…" phases
+- `useAiStream`: error only shown when content is empty — partial responses are kept
+
+### Blockers / lessons
+- Streaming endpoints don't retry — partial data may already be sent to browser, retry would confuse client
+- `contentRef` (useRef) needed alongside state because onerror closure captures stale state values
+- Error classification uses message-based matching, not instanceof — more resilient across SDK versions
+- Token logging wrapped in its own try-catch — SDK API changes shouldn't break the main flow
+
+### Week 3 deliverable
+Four working AI features: auto-categorization, streaming monthly report, natural language query with conversation history, and spending anomaly detection. All with timeout, retry, and graceful error handling.
+
+### Next session goal
+- Day 22: Production config — separate dev/prod configs, externalize all secrets
+
 ## 2026-05-29 (Thursday) · Day 20 — AI conversation history with context injection
 
 **Phase:** Week 3 (LLM Features)
