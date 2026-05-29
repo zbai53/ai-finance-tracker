@@ -4,6 +4,32 @@
 > The newest entry goes at the TOP. Older entries roll down.
 
 ---
+
+
+## 2026-05-29 (Friday) · Day 19 — Spending anomaly detection
+
+**Phase:** Week 3 (LLM Features)
+**Time spent:** ~2 hrs
+**Day:** 19 of 28
+
+### Done
+- Created `AnomalyService.java` — fetches current month + previous 2 months category spending, builds comparison table, streams Claude's analysis
+- Added `GET /api/ai/anomalies?year=&month=` endpoint to `AiController`
+- Added `buildAnomalyUrl()` to `useAiStream.ts`
+- Added "⚠ Check Anomalies" button (amber accent) to Dashboard
+- Anomaly card renders markdown with `ReactMarkdown`
+- Tested: correctly identified new spending categories vs $0 average from prior months
+
+### Blockers / lessons
+- API key committed to application.yml AGAIN — must use `${ANTHROPIC_API_KEY:fallback}` pattern and never hardcode
+- Permanent fix: added key to `~/.zshrc` so it's always available without manual export
+- After any key leak: revoke immediately and generate new one, even after git rebase
+- Category comparison uses name-based matching (not ID) — correct because categoryId can change if user deletes and recreates
+
+### Next session goal
+- Day 20: AI conversation history — persist interactions and inject recent history as context
+
+
 ## 2026-05-27 (Tuesday) · Day 18 — Natural language transaction query
 
 **Phase:** Week 3 (LLM Features)
