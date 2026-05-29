@@ -78,3 +78,9 @@ export function buildQueryUrl(question: string): string {
   const token = localStorage.getItem('token') ?? '';
   return `${BASE_URL}/api/ai/query?question=${encodeURIComponent(question)}&token=${encodeURIComponent(token)}`;
 }
+
+/** Build the URL for the spending anomaly detection endpoint */
+export function buildAnomalyUrl(year: number, month: number): string {
+  const token = localStorage.getItem('token') ?? '';
+  return `${BASE_URL}/api/ai/anomalies?year=${year}&month=${month}&token=${encodeURIComponent(token)}`;
+}

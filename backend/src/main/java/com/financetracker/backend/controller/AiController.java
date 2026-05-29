@@ -1,6 +1,7 @@
 package com.financetracker.backend.controller;
 
 import com.financetracker.backend.ai.AiService;
+import com.financetracker.backend.ai.AnomalyService;
 import com.financetracker.backend.ai.NlQueryService;
 import com.financetracker.backend.ai.ReportService;
 import com.financetracker.backend.entity.User;
@@ -25,6 +26,7 @@ public class AiController {
     private final AiService aiService;
     private final ReportService reportService;
     private final NlQueryService nlQueryService;
+    private final AnomalyService anomalyService;
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@RequestParam String prompt) {
@@ -67,6 +69,23 @@ public class AiController {
         CompletableFuture.runAsync(() -> nlQueryService.processQuery(userId, question, emitter))
                 .exceptionally(ex -> {
                     log.error("Unexpected error in NL query task for userId={}", userId, ex);
+                    emitter.completeWithError(ex);
+                    return null;
+                });
+
+        return emitter;
+    }
+
+    @GetMapping(value = "/anomalies", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter anomalies(@RequestParam int year, @RequestParam int month) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = currentUser.getId();
+
+        SseEmitter emitter = new SseEmitter(60_000L);
+
+        CompletableFuture.runAsync(() -> anomalyService.detectAnomalies(userId, year, month, emitter))
+                .exceptionally(ex -> {
+                    log.error("Unexpected error in anomaly detection for userId={}", userId, ex);
                     emitter.completeWithError(ex);
                     return null;
                 });

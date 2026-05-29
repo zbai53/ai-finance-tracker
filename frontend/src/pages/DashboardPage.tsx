@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAiStream, buildReportUrl, buildQueryUrl } from '../hooks/useAiStream';
+import { useAiStream, buildReportUrl, buildQueryUrl, buildAnomalyUrl } from '../hooks/useAiStream';
 import {
   ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -74,6 +74,7 @@ function SummaryCard({ title, value, color, loading }: SummaryCardProps) {
 export function DashboardPage() {
   const { content: reportContent, isStreaming: reportStreaming, start: startReport, reset: resetReport } = useAiStream();
   const { content: queryContent, isStreaming: queryStreaming, start: startQuery, reset: resetQuery } = useAiStream();
+  const { content: anomalyContent, isStreaming: anomalyStreaming, start: startAnomaly, reset: resetAnomaly } = useAiStream();
   const [question, setQuestion] = useState('');
   const now = new Date();
 
@@ -180,6 +181,13 @@ export function DashboardPage() {
           className="ml-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
         >
           {reportStreaming ? 'Generating…' : '✦ Generate AI Report'}
+        </button>
+        <button
+          onClick={() => startAnomaly(buildAnomalyUrl(selectedYear, selectedMonth))}
+          disabled={anomalyStreaming}
+          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-60"
+        >
+          {anomalyStreaming ? 'Checking…' : '⚠ Check Anomalies'}
         </button>
       </div>
 
@@ -320,6 +328,43 @@ export function DashboardPage() {
               <div className="prose prose-sm max-w-none text-gray-700">
                 <ReactMarkdown>{reportContent}</ReactMarkdown>
                 {reportStreaming && <span className="animate-pulse">▌</span>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Anomaly card ── */}
+      {(anomalyStreaming || anomalyContent) && (
+        <div className="mt-6 rounded-xl border border-amber-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-amber-100 px-5 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-500">⚠</span>
+              <h2 className="text-sm font-semibold text-gray-700">
+                Spending Anomalies — {LONG_MONTH_NAMES[selectedMonth - 1]} {selectedYear}
+              </h2>
+              {anomalyStreaming && (
+                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+              )}
+            </div>
+            <button
+              onClick={resetAnomaly}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div className="px-5 py-4">
+            {anomalyStreaming && !anomalyContent ? (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
+                Comparing with previous months…
+              </div>
+            ) : (
+              <div className="prose prose-sm max-w-none text-gray-700">
+                <ReactMarkdown>{anomalyContent}</ReactMarkdown>
+                {anomalyStreaming && <span className="animate-pulse">▌</span>}
               </div>
             )}
           </div>
