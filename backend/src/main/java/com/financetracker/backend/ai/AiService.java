@@ -129,6 +129,47 @@ public class AiService {
     }
 
     /**
+     * Streams a Claude response to the emitter AND returns the full accumulated text.
+     * Used when callers need to persist the answer after streaming.
+     */
+    public String streamResponseAndCapture(String prompt, SseEmitter emitter) {
+        StringBuilder captured = new StringBuilder();
+        try {
+            AnthropicClient client = buildClient();
+
+            MessageCreateParams params = MessageCreateParams.builder()
+                    .model("claude-sonnet-4-5")
+                    .maxTokens(1000L)
+                    .addUserMessage(prompt)
+                    .build();
+
+            try (var streamResponse = client.messages().createStreaming(params)) {
+                streamResponse.stream()
+                        .flatMap(event -> event.contentBlockDelta().stream())
+                        .flatMap(deltaEvent -> deltaEvent.delta().text().stream())
+                        .forEach(textDelta -> {
+                            String text = textDelta.text();
+                            captured.append(text);
+                            try {
+                                emitter.send(text);
+                            } catch (Exception sendEx) {
+                                throw new RuntimeException(sendEx);
+                            }
+                        });
+            }
+
+            emitter.complete();
+            log.info("AI stream+capture completed for prompt (first 80): '{}'",
+                    prompt.substring(0, Math.min(prompt.length(), 80)));
+
+        } catch (Exception e) {
+            log.warn("AI stream+capture error: {}", e.getMessage());
+            emitter.completeWithError(e);
+        }
+        return captured.toString();
+    }
+
+    /**
      * Calls Claude non-streaming and returns the full text response.
      * Intended for structured extraction tasks (e.g., JSON intent parsing).
      */

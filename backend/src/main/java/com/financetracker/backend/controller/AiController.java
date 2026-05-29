@@ -2,8 +2,11 @@ package com.financetracker.backend.controller;
 
 import com.financetracker.backend.ai.AiService;
 import com.financetracker.backend.ai.AnomalyService;
+import com.financetracker.backend.ai.ConversationService;
 import com.financetracker.backend.ai.NlQueryService;
 import com.financetracker.backend.ai.ReportService;
+import com.financetracker.backend.common.Result;
+import com.financetracker.backend.entity.AiConversation;
 import com.financetracker.backend.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -27,6 +31,7 @@ public class AiController {
     private final ReportService reportService;
     private final NlQueryService nlQueryService;
     private final AnomalyService anomalyService;
+    private final ConversationService conversationService;
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@RequestParam String prompt) {
@@ -91,5 +96,13 @@ public class AiController {
                 });
 
         return emitter;
+    }
+
+    @GetMapping("/history")
+    public Result<List<AiConversation>> history() {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = currentUser.getId();
+        List<AiConversation> history = conversationService.getRecent(userId, 20);
+        return Result.success(history);
     }
 }

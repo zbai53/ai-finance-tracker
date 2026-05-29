@@ -3,6 +3,7 @@ package com.financetracker.backend.ai;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.financetracker.backend.entity.AiConversation;
 import com.financetracker.backend.entity.Category;
 import com.financetracker.backend.entity.Transaction;
 import com.financetracker.backend.mapper.CategoryMapper;
@@ -26,11 +27,16 @@ public class NlQueryService {
     private final CategoryMapper categoryMapper;
     private final TransactionMapper transactionMapper;
     private final AiService aiService;
+    private final ConversationService conversationService;
     private final ObjectMapper objectMapper;
 
     public void processQuery(Long userId, String question, SseEmitter emitter) {
         try {
-            // 1. Load user's categories
+            // 1. Load last 5 conversation turns for context
+            List<AiConversation> history = conversationService.getRecent(userId, 5);
+            String contextBlock = conversationService.buildContextString(history);
+
+            // 2. Load user's categories
             List<Category> categories = categoryMapper.selectList(
                     new LambdaQueryWrapper<Category>().eq(Category::getUserId, userId)
             );
@@ -39,7 +45,7 @@ public class NlQueryService {
                     .map(c -> c.getName() + " (" + c.getType() + ")")
                     .collect(Collectors.joining(", "));
 
-            // 2. Ask Claude to extract structured intent (non-streaming)
+            // 3. Ask Claude to extract structured intent (non-streaming, no history needed)
             String intentPrompt = """
                     Extract the query intent as JSON only. No explanation, no markdown, no extra text.
                     Today's date is %s.
@@ -81,11 +87,19 @@ public class NlQueryService {
 
             log.info("NL query matched {} transactions for userId={}", transactions.size(), userId);
 
-            // 6. Build data context
-            String dataContext = buildDataContext(question, transactions);
+            // 6. Build data context, prepending conversation history
+            String dataContext = contextBlock + buildDataContext(question, transactions);
 
-            // 7. Stream the natural-language answer
-            aiService.streamResponse(dataContext, emitter);
+            // 7. Save the user's question
+            conversationService.save(userId, "user", question);
+
+            // 8. Stream the natural-language answer and capture it for persistence
+            String answer = aiService.streamResponseAndCapture(dataContext, emitter);
+
+            // 9. Save the assistant's answer (only if non-empty — error paths return "")
+            if (!answer.isBlank()) {
+                conversationService.save(userId, "assistant", answer);
+            }
 
         } catch (Exception e) {
             log.error("NL query failed for userId={}: {}", userId, e.getMessage(), e);

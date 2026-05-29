@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAiStream, buildReportUrl, buildQueryUrl, buildAnomalyUrl } from '../hooks/useAiStream';
+import { getAiHistory } from '../api/ai';
+import type { AiConversation } from '../api/ai';
 import {
   ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -76,6 +78,9 @@ export function DashboardPage() {
   const { content: queryContent, isStreaming: queryStreaming, start: startQuery, reset: resetQuery } = useAiStream();
   const { content: anomalyContent, isStreaming: anomalyStreaming, start: startAnomaly, reset: resetAnomaly } = useAiStream();
   const [question, setQuestion] = useState('');
+  const [history, setHistory] = useState<AiConversation[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const prevQueryStreamingRef = useRef(false);
   const now = new Date();
 
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -89,6 +94,19 @@ export function DashboardPage() {
 
   const [pieData, setPieData] = useState<CategoryStatistics[]>([]);
   const [pieLoading, setPieLoading] = useState(false);
+
+  // Fetch history on mount
+  useEffect(() => {
+    getAiHistory().then(setHistory).catch(() => setHistory([]));
+  }, []);
+
+  // Refresh history whenever the query stream finishes
+  useEffect(() => {
+    if (prevQueryStreamingRef.current && !queryStreaming) {
+      getAiHistory().then(setHistory).catch(() => setHistory([]));
+    }
+    prevQueryStreamingRef.current = queryStreaming;
+  }, [queryStreaming]);
 
   // Fetch summary for selected month
   useEffect(() => {
@@ -430,6 +448,59 @@ export function DashboardPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Conversation history ── */}
+      <div className="mt-4">
+        <button
+          onClick={() => setShowHistory(h => !h)}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+        >
+          <svg
+            className={`h-4 w-4 transition-transform ${showHistory ? 'rotate-90' : ''}`}
+            viewBox="0 0 20 20" fill="currentColor"
+          >
+            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+          </svg>
+          {showHistory ? 'Hide' : 'Show'} Conversation History
+          {history.length > 0 && (
+            <span className="ml-1 rounded-full bg-gray-200 px-1.5 py-0.5 text-xs text-gray-600">
+              {history.length}
+            </span>
+          )}
+        </button>
+
+        {showHistory && (
+          <div className="mt-3 max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+            {history.length === 0 ? (
+              <p className="px-5 py-6 text-center text-sm text-gray-400">
+                No conversation history yet. Ask a question above to get started.
+              </p>
+            ) : (
+              <ul className="divide-y divide-gray-100">
+                {history.map(turn => (
+                  <li key={turn.id} className="flex gap-3 px-5 py-3">
+                    <span className={`mt-0.5 flex-shrink-0 rounded px-1.5 py-0.5 text-xs font-medium ${
+                      turn.role === 'user'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-violet-100 text-violet-700'
+                    }`}>
+                      {turn.role === 'user' ? 'You' : 'AI'}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="whitespace-pre-wrap break-words text-sm text-gray-700">
+                        {turn.message}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-400">
+                        {new Date(turn.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </div>
