@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-05-29 (Thursday) · Day 20 — AI conversation history with context injection
+
+**Phase:** Week 3 (LLM Features)
+**Time spent:** ~2 hrs
+**Day:** 20 of 28
+
+### Done
+- Created `ConversationService.java` with save(), getRecent(), buildContextString()
+- Updated `NlQueryService` to load last 5 conversations as context for answer prompt
+- Saves user question before streaming, saves assistant answer after streaming completes
+- Added `GET /api/ai/history` endpoint returning last 20 conversations as JSON
+- Created `src/api/ai.ts` with `getAiHistory()` function
+- Added collapsible conversation history panel to DashboardPage
+- History refreshes automatically after each query completes
+- Created `run.sh` startup script to pass ANTHROPIC_API_KEY via JVM argument
+
+### Blockers / lessons
+- `mvn spring-boot:run` doesn't reliably pass terminal environment variables to the Java subprocess — use `-Dspring-boot.run.jvmArguments` to inject directly
+- `run.sh` with `source ~/.zshrc` is the permanent fix — one command to start backend
+- Context is only added to the final answer prompt, NOT the intent extraction prompt — adding history to JSON extraction would confuse structured output
+- `AiService.streamResponseAndCapture()` accumulates content in StringBuilder while streaming — captures the full response for persistence
+
+### Next session goal
+- Day 21: Add timeout, retry, and graceful error handling for all AI features
+
 
 ## 2026-05-29 (Friday) · Day 19 — Spending anomaly detection
 
