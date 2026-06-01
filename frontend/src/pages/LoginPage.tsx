@@ -12,6 +12,20 @@ export function LoginPage() {
   const { login: saveToken } = useAuth();
   const navigate = useNavigate();
 
+  const handleDemoLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const token = await login({ email: 'demo@example.com', password: 'demo123456' });
+      saveToken(token);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Demo login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -72,6 +86,22 @@ export function LoginPage() {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+
+        <div className="mt-4">
+          <div className="relative flex items-center">
+            <div className="flex-grow border-t border-gray-200" />
+            <span className="mx-3 text-xs text-gray-400">or</span>
+            <div className="flex-grow border-t border-gray-200" />
+          </div>
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            disabled={loading}
+            className="mt-3 w-full rounded-md border border-gray-300 bg-white py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Try Demo Account
+          </button>
+        </div>
 
         <p className="text-sm text-gray-600 mt-4 text-center">
           Don't have an account?{' '}
