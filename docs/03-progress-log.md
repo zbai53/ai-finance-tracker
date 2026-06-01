@@ -5,6 +5,37 @@
 
 ---
 
+
+## 2026-05-31 (Sunday) · Day 22-25 — Production deployment
+
+**Phase:** Week 4 (Deploy + Polish)
+**Time spent:** ~4 hrs
+**Day:** 25 of 28
+
+### Done
+- Created `application-prod.yml` with all secrets as environment variables
+- Added GitHub Actions CI pipeline (`.github/workflows/ci.yml`) — builds backend and frontend on every push
+- Deployed backend to Railway — connected GitHub repo, set Root Directory to `backend`
+- Created Railway MySQL database — connected to backend via `${{MySQL.MYSQL_URL}}` variable references
+- Created 4 tables in Railway MySQL via mysql CLI
+- Set all production environment variables in Railway: DB_URL, JWT_SECRET, ANTHROPIC_API_KEY, SPRING_PROFILES_ACTIVE=prod
+- Deployed frontend to Vercel — Root Directory `frontend`, added VITE_API_BASE_URL environment variable
+- Fixed TypeScript build errors for production (Recharts Tooltip types, unused useEffect import)
+- Full E2E test on production: register → login → create transaction → dashboard → AI report ✅
+- Live URLs:
+  - Frontend: https://ai-finance-tracker-lake.vercel.app
+  - Backend: https://ai-finance-tracker-production-be97.up.railway.app
+
+### Blockers / lessons
+- Railway Railpack needs Root Directory set to `backend` — otherwise it can't detect the project type
+- PlanetScale no longer has a free tier — used Railway MySQL instead (same project, internal networking)
+- `MYSQL_PUBLIC_URL` gives external access; `MYSQL_URL` uses internal Railway network (faster, use for production)
+- Vercel uses strict TypeScript — local warnings become errors in production build
+- API keys must never be in committed files — GitHub push protection catches them immediately
+
+### Next session goal
+- Day 26: Add demo account with seeded data so interviewers can try the app without signing up
+
 ## 2026-05-29 (Thursday) · Day 21 — AI error handling and production polish
 
 **Phase:** Week 3 (LLM Features) — COMPLETE
