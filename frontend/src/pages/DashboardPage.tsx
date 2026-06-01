@@ -256,8 +256,8 @@ export function DashboardPage() {
               <LineChart data={lineData} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} width={55} tickFormatter={(v: number) => `$${v.toLocaleString()}`} />
-                <Tooltip formatter={(v: number) => `$${v.toLocaleString('en-US', { minimumFractionDigits: 2 })}`} />
+                <YAxis tick={{ fontSize: 12 }} width={55} tickFormatter={(v) => `$${v.toLocaleString()}`} />
+                <Tooltip formatter={(v) => `$${Number(v).toLocaleString('en-US', { minimumFractionDigits: 2 })}`} />
                 <Legend />
                 <Line type="monotone" dataKey="income" stroke="#16a34a" strokeWidth={2} dot={false} name="Income" />
                 <Line type="monotone" dataKey="expense" stroke="#dc2626" strokeWidth={2} dot={false} name="Expense" />
@@ -297,8 +297,8 @@ export function DashboardPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number, name: string) => [
-                      `$${value.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                    formatter={(value, name) => [
+                      `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
                       name,
                     ]}
                   />
