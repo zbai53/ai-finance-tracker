@@ -62,12 +62,14 @@ export function TransactionModal({ isOpen, onClose, onSuccess, transaction }: Tr
     setConfirmDelete(false);
   }, [transaction, isOpen]);
 
-  // Fetch categories on mount
+  // Fetch categories whenever the modal opens
   useEffect(() => {
-    getCategories()
-      .then(setCategories)
-      .catch(() => setCategories([]));
-  }, []);
+    if (isOpen) {
+      getCategories()
+        .then(setCategories)
+        .catch(() => setCategories([]));
+    }
+  }, [isOpen]);
 
   const filteredCategories = categories.filter(c => c.type === form.type);
 

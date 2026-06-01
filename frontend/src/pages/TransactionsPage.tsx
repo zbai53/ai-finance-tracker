@@ -3,6 +3,7 @@ import type { Transaction, Category } from '../types';
 import { getTransactions } from '../api/transactions';
 import { getCategories } from '../api/categories';
 import { TransactionModal } from '../components/TransactionModal';
+import { CategoryModal } from '../components/CategoryModal';
 
 type TypeFilter = '' | 'income' | 'expense';
 
@@ -21,6 +22,7 @@ export function TransactionsPage() {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
   const totalPages = Math.ceil(total / size);
   const refresh = () => setRefreshKey(k => k + 1);
@@ -77,12 +79,20 @@ export function TransactionsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Transactions</h1>
-        <button
-          onClick={() => { setEditingTransaction(undefined); setModalOpen(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-        >
-          + New Transaction
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCategoryModalOpen(true)}
+            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+          >
+            ⚙ Categories
+          </button>
+          <button
+            onClick={() => { setEditingTransaction(undefined); setModalOpen(true); }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
+            + New Transaction
+          </button>
+        </div>
       </div>
 
       {/* Filter bar */}
@@ -189,7 +199,16 @@ export function TransactionsPage() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Category modal */}
+      <CategoryModal
+        isOpen={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
+        onSuccess={() => {
+          getCategories().then(setCategories).catch(() => setCategories([]));
+        }}
+      />
+
+      {/* Transaction modal */}
       <TransactionModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
